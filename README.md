@@ -4,5 +4,6 @@ https://en.wikipedia.org/wiki/Kruskal%27s_algorithm
 
 implemented in c++.
 
+GIF FROM WIKI:
 
 ![](KruskalDemo.gif)
