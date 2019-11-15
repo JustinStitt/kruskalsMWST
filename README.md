@@ -3,3 +3,6 @@ Find the Minimum Weight Spanning Tree (MWST) of an undirected and weighted graph
 https://en.wikipedia.org/wiki/Kruskal%27s_algorithm
 
 implemented in c++.
+
+
+![](KruskalsDemo.gif)
