@@ -7,3 +7,4 @@ implemented in c++.
 GIF FROM WIKI:
 
 ![](KruskalDemo.gif)
+![](example-spanning-tree.gif)
