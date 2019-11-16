@@ -70,22 +70,22 @@ public:
 
 vector<edge> find_mwst(Graph);
 bool is_in(vertex*, vector<edge>);
-vector<edge> find_mwst_new(Graph);
 int calc_weight(vector<edge>);
+int exists_in(vertex*, vector<vector<edge>>);
 
 int main()
 {
 	vector<vector<int>> connection_matrix = 
-	{ {0,1},{1,2},{2,0},{0,3},{2,3} };
-	vector<int> weight_matrix = {1,2,3,4,5}; 
+	{ {4,5},{0,4},{0,1},{3,6},{5,8},{5,7},{4,7},{2,3},{6,9},{6,5},{3,5},{6,8},{8,9},{7,8},{1,3},{1,2},{2,6} };
+	vector<int> weight_matrix = { 1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18 };
 	cout << "Graph (Undirected and Weighted) \n";
 	cout << string(50, '=') << endl;
-	Graph g(4,connection_matrix, weight_matrix);//dont forget to change amount of nodes!!
+	Graph g(10,connection_matrix, weight_matrix);//dont forget to change amount of nodes!!
 
 	cout << string(50, '=') << endl;
 	cout << "Minimum Weight Spanning Tree: \n";
 
-	vector<edge> mwst = find_mwst_new(g);
+	vector<edge> mwst = find_mwst(g);
 	g.edges = mwst;
 	g.print_graph();
 	cout << string(50, '=') << endl;
@@ -96,85 +96,69 @@ int main()
 }
 
 vector<edge> find_mwst(Graph g)//given a Graph g, find the minimum weight spanning tree (mwst) and return it some new edges
-{	//our weight matrix has to be sorted least to greatest, done manually for now
-	vector<edge> new_edges;//we will append our mwst edges here iteratively
-	//here we are manually adding our first edge as it is arbitrarily chosen to be in our mwst since its sorted least to greatest
-	edge e;
-	e.v1 = g.edges[0].v1;
-	e.v2 = g.edges[0].v2;
-	e.weight = g.edges[0].weight;
-	new_edges.push_back(e);
-	for (int x = 0; x < g.edges.size(); x++)
-	{//loop through every edge in our graph starting with lowest weight edges since its pre-sorted
-		for (int y = 0; y < new_edges.size(); y++)
-		{
-			if (g.edges[x].v2 == new_edges[y].v1 || g.edges[x].v2 == new_edges[y].v2)
-			{//we found a match for our v2 in our mwst already so we dont add it
-				break;
-			}
-
-			if (y == new_edges.size() - 1)//if we are on last index and we havent break yet
-			{
-				e = g.edges[x];//does this copy values or mem. address?
-				new_edges.push_back(e);
-				break;
-			}
-		}
-	}
-		return new_edges;
-}
-
-vector<edge> find_mwst_new(Graph g)
-{
+{	
 	vector<edge> new_edges;
 	edge e;
 	vector<vector<edge>> sets;
-
-	//cout << "a" << is_in(g.edges[0].v1, sets[0]) << endl;
 	e = g.edges[0];
 	new_edges.push_back(e);
 	sets.push_back({ e });
-	for (int x = 0; x < g.edges.size(); x++)
-	{//loop through all edges we wish to check to place into ur mwst
-		for (int y = 0; y < sets.size(); y++)
+	for (int x = 1; x < g.edges.size(); x++)
+	{//loop through each edge we are looking to add
+		if (    (exists_in(g.edges[x].v1, sets) == exists_in(g.edges[x].v2, sets)) && exists_in(g.edges[x].v1,sets) != -1)//if v1 and v2 exist in the same set. dont add
 		{
-			if (is_in(g.edges[x].v1, sets[y])  && is_in(g.edges[x].v2,sets[y]) )
-			{//if v1 and v2 are in set y then dont add
-				break;
+			//do nothing
+			continue;//just go next iteration... this wont work
+		}
+		else
+		{
+			if (exists_in(g.edges[x].v2, sets) == -1 && exists_in(g.edges[x].v1, sets) != -1)
+			{//if v2 doesnt exist in any Sets but v1 does, then we just add v1,v2 to set that v1 is in
+				int index = exists_in(g.edges[x].v1, sets);
+				e = g.edges[x];
+				new_edges.push_back(e);
+				sets[index].push_back({e});
 			}
-			else if (is_in(g.edges[x].v1, sets[y]) && !is_in(g.edges[x].v2, sets[y]))
-			{//if v1 is in set y but v2 is not then add v2 to set y and to mwst
-
-				//if v1 is in the set y and v2 is not in the set y, then check if v2 is in ANY other set Z, if so. merge Y and Z sets.
-				for (int z = 0; z < sets.size(); z++)
+			else if (exists_in(g.edges[x].v2, sets) != -1 && exists_in(g.edges[x].v1, sets) == -1)
+			{//if v2 exists in a set and v1 doesnt exist in a set
+				int index = exists_in(g.edges[x].v2, sets);
+				e = g.edges[x];
+				new_edges.push_back(e);
+				sets[index].push_back({ e });
+			}
+			else if (exists_in(g.edges[x].v1, sets) == -1 && exists_in(g.edges[x].v2, sets) == -1)
+			{//if both v1 and v2 dont exist in any sets, then make a new set with this edge in it and add to mwst
+				e = g.edges[x];
+				new_edges.push_back(e);
+				sets.push_back({ e });
+			}
+			else if (exists_in(g.edges[x].v1, sets) != exists_in(g.edges[x].v2,sets))
+			{//if both v1 and v2 exist but are not in the same set
+				int indexv2 = exists_in(g.edges[x].v2, sets);
+				int indexv1 = exists_in(g.edges[x].v1, sets);
+				if (is_in(g.edges[x].v1, sets[indexv2]))
 				{
-					if (is_in(g.edges[x].v2, sets[z]))
-					{
-						//MERGE SET Y AND Z
-						for (edge ed : sets[z])
-						{
-							sets[y].push_back(ed);
-						}
-						sets[z].erase(sets[z].begin(), sets[z].end());
-					}
+					continue;
 				}
-				e = g.edges[x];
-				new_edges.push_back(e);
-				sets[y].push_back(e);
-				break;
-
-			}
-			else if (!is_in(g.edges[x].v1, sets[y]) && !is_in(g.edges[x].v2, sets[y]))
-			{//if both v1 and v2 are not in set y then make a new set
-				e = g.edges[x];
-				new_edges.push_back(e);
-				sets.push_back({e});
-				break;
+				else
+				{
+					//add edge
+					e = g.edges[x];
+					new_edges.push_back(e);
+					for (edge ed : sets[indexv2])
+					{//puts all edges from the set containing v2 to the set containing v1
+						sets[indexv1].push_back(ed);
+					}
+					sets[indexv2].erase(sets[indexv2].begin(), sets[indexv2].end());//erase the entire set after we've merged it
+					//merge sets
+				}
 			}
 		}
 	}
 	return new_edges;
 }
+
+
 bool is_in(vertex  *v, vector<edge> edges)
 {
 	for (int x = 0; x < edges.size(); x++)
@@ -185,6 +169,18 @@ bool is_in(vertex  *v, vector<edge> edges)
 		}
 	}
 	return false;
+}
+
+int exists_in(vertex *v, vector<vector<edge>> sets)//returns the index of the first set v is in
+{
+	for (int x = 0; x < sets.size(); x++)
+	{
+		if (is_in(v, sets[x]))
+		{
+			return x;//the first time we find v in a set
+		}
+	}
+	return -1;//not in set
 }
 
 int calc_weight(vector<edge> edges)
