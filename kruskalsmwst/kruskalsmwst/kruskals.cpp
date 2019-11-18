@@ -15,6 +15,7 @@ using namespace std;
 
 struct vertex
 {
+	char name;
 	int weight = 1;
 };
 
@@ -23,6 +24,9 @@ struct edge {
 	vertex *v1, *v2;
 	int weight;
 };
+
+string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 
 class Graph {
 private:
@@ -37,6 +41,7 @@ public:
 	Graph(int num_vertices, vector<vector<int>> connection_matrix,vector<int> weight_matrix)
 	{
 		v.resize(num_vertices);
+		assign_vertex_names();
 		form_edges(edges,connection_matrix,weight_matrix);
 		print_graph();
 		//print_vertices();
@@ -54,7 +59,7 @@ public:
 	}
 	void print_graph(){
 		for (int x = 0; x < edges.size(); x++) {
-			cout << edges[x].v1 << "---" << edges[x].weight << "---" << edges[x].v2 << endl;
+			cout << edges[x].v1->name << "---" << edges[x].weight << "---" << edges[x].v2->name << endl;
 		}
 	}
 	void print_vertices()
@@ -62,8 +67,13 @@ public:
 		cout << "Number of Vertices: " << v.size() << endl;
 		for (int x = 0; x < v.size(); x++)
 		{
-			cout << &v[x] << endl;
+			cout << v[x].name << endl;
 		}
+	}
+	void assign_vertex_names()
+	{
+		for (int x = 0; x < v.size(); x++)
+			v[x].name = alphabet[x];
 	}
 
 };
