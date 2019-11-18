@@ -82,12 +82,17 @@ vector<edge> find_mwst(Graph);
 bool is_in(vertex*, vector<edge>);
 int calc_weight(vector<edge>);
 int exists_in(vertex*, vector<vector<edge>>);
+template<typename T>
+void swap_elements(vector<T>&, int, int);
+void sort_matrix(vector<int> &, vector<vector<int>>&);
 
 int main()
 {
 	vector<vector<int>> connection_matrix = 
-	{ {4,5},{0,4},{0,1},{3,6},{5,8},{5,7},{4,7},{2,3},{6,9},{6,5},{3,5},{6,8},{8,9},{7,8},{1,3},{1,2},{2,6} };
-	vector<int> weight_matrix = { 1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18 };
+	{ {2,6},{3,6},{0,1},{0,4},{5,8},{5,7},{4,7},{2,3},{6,9},{6,5},{3,5},{6,8},{8,9},{7,8},{1,3},{1,2},{4,5} };
+	vector<int> weight_matrix = { 18,4,3,2,5,6,7,8,9,10,11,12,13,15,16,17,1 };
+	sort_matrix(weight_matrix, connection_matrix);
+
 	cout << "Graph (Undirected and Weighted) \n";
 	cout << string(50, '=') << endl;
 	Graph g(10,connection_matrix, weight_matrix);//dont forget to change amount of nodes!!
@@ -115,38 +120,38 @@ vector<edge> find_mwst(Graph g)//given a Graph g, find the minimum weight spanni
 	sets.push_back({ e });
 	for (int x = 1; x < g.edges.size(); x++)
 	{//loop through each edge we are looking to add
-		if (    (exists_in(g.edges[x].v1, sets) == exists_in(g.edges[x].v2, sets)) && exists_in(g.edges[x].v1,sets) != -1)//if v1 and v2 exist in the same set. dont add
+		int _v1 = exists_in(g.edges[x].v1, sets);
+		int _v2 = exists_in(g.edges[x].v2, sets);
+		if (    _v1 == _v2 && _v1 != -1)//if v1 and v2 exist in the same set. dont add
 		{
 			//do nothing
 			continue;//just go next iteration... this wont work
 		}
 		else
 		{
-			if (exists_in(g.edges[x].v2, sets) == -1 && exists_in(g.edges[x].v1, sets) != -1)
+			if (_v2 == -1 && _v1 != -1)
 			{//if v2 doesnt exist in any Sets but v1 does, then we just add v1,v2 to set that v1 is in
-				int index = exists_in(g.edges[x].v1, sets);
+				int index = _v1;
 				e = g.edges[x];
 				new_edges.push_back(e);
 				sets[index].push_back({e});
 			}
-			else if (exists_in(g.edges[x].v2, sets) != -1 && exists_in(g.edges[x].v1, sets) == -1)
+			else if (_v2 != -1 && _v1 == -1)
 			{//if v2 exists in a set and v1 doesnt exist in a set
-				int index = exists_in(g.edges[x].v2, sets);
+				int index = _v2;
 				e = g.edges[x];
 				new_edges.push_back(e);
 				sets[index].push_back({ e });
 			}
-			else if (exists_in(g.edges[x].v1, sets) == -1 && exists_in(g.edges[x].v2, sets) == -1)
+			else if (_v1 == -1 && _v2 == -1)
 			{//if both v1 and v2 dont exist in any sets, then make a new set with this edge in it and add to mwst
 				e = g.edges[x];
 				new_edges.push_back(e);
 				sets.push_back({ e });
 			}
-			else if (exists_in(g.edges[x].v1, sets) != exists_in(g.edges[x].v2,sets))
+			else if (_v1 != _v2)
 			{//if both v1 and v2 exist but are not in the same set
-				int indexv2 = exists_in(g.edges[x].v2, sets);
-				int indexv1 = exists_in(g.edges[x].v1, sets);
-				if (is_in(g.edges[x].v1, sets[indexv2]))
+				if (is_in(g.edges[x].v1, sets[_v2]))
 				{
 					continue;
 				}
@@ -155,11 +160,11 @@ vector<edge> find_mwst(Graph g)//given a Graph g, find the minimum weight spanni
 					//add edge
 					e = g.edges[x];
 					new_edges.push_back(e);
-					for (edge ed : sets[indexv2])
+					for (edge ed : sets[_v2])
 					{//puts all edges from the set containing v2 to the set containing v1
-						sets[indexv1].push_back(ed);
+						sets[_v1].push_back(ed);
 					}
-					sets[indexv2].erase(sets[indexv2].begin(), sets[indexv2].end());//erase the entire set after we've merged it
+					sets[_v2].erase(sets[_v2].begin(), sets[_v2].end());//erase the entire set after we've merged it
 					//merge sets
 				}
 			}
@@ -202,3 +207,27 @@ int calc_weight(vector<edge> edges)
 	}
 	return total;
 }
+
+template<typename T>
+void swap_elements(vector<T> &vec,int n,int m)
+{//swaps n and m
+	T _element = vec[n];
+	vec[n] = vec[m];
+	vec[m] = _element;
+}
+
+void sort_matrix(vector<int> &weight_matrix,vector<vector<int>> &cm)
+{
+	for (int x = 0; x < weight_matrix.size(); x++)
+	{
+		for (int y = 0; y < weight_matrix.size() - 1; y++)
+		{
+			if (weight_matrix[y] > weight_matrix[y + 1])
+			{
+				swap_elements(weight_matrix, y, y + 1);
+				swap_elements(cm, y, y + 1);
+			}
+		}
+	}
+}
+
