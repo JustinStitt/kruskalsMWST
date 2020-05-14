@@ -12,4 +12,4 @@ GIF FROM WIKI:
 **Sample Output:**
 
 
-![](mwstimg.png)
+![](mwstSample.png)
