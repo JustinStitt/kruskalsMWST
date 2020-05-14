@@ -8,3 +8,6 @@ GIF FROM WIKI:
 
 ![](KruskalDemo.gif)
 ![](example-spanning-tree.gif)
+
+**Sample Output:**
+![](mwst.png)
