@@ -10,4 +10,5 @@ GIF FROM WIKI:
 ![](example-spanning-tree.gif)
 
 **Sample Output:**
+
 ![](mwst.png)
